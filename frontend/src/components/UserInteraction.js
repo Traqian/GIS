@@ -12,71 +12,69 @@ const UserInteraction = () => {
     const [isListening, setIsListening] = useState(false);
 
     useEffect(() => {
-        // Load predefined voice commands
-        const loadCommands = async () => {
-            try {
-                const response = await axios.get('http://localhost:3000/api/voice-commands');
-                setVoiceCommands(response.data);
-            } catch (error) {
-                console.error('Error loading voice commands:', error);
-            }
-        };
-
-        loadCommands();
+        // Set predefined voice commands
+        setVoiceCommands([
+            { trigger: '导航', action: 'navigate' },
+            { trigger: '搜索', action: 'search' },
+            { trigger: '分享位置', action: 'share' }
+        ]);
     }, []);
 
-    const handleSubmitFeedback = async (e) => {
+    const handleSubmitFeedback = (e) => {
         e.preventDefault();
-        try {
-            await axios.post('http://localhost:3000/api/feedback', {
-                feedback: feedback,
-                timestamp: new Date()
-            });
-            setFeedback('');
-            setFeedbackSubmitted(true);
-            setTimeout(() => setFeedbackSubmitted(false), 3000);
-        } catch (error) {
-            console.error('Error submitting feedback:', error);
-            alert('提交反馈失败，请稍后重试');
-        }
+        // Store feedback locally since we don't have a backend
+        console.log('Feedback submitted:', feedback);
+        setFeedback('');
+        setFeedbackSubmitted(true);
+        setTimeout(() => setFeedbackSubmitted(false), 3000);
     };
 
-    const handleVoiceCommand = (command) => {
-        const timestamp = new Date().toLocaleTimeString();
-        setCommandHistory(prev => [
-            ...prev,
-            { command, timestamp }
-        ]);
-
-        // Process voice command
-        if (voiceCommands.some(cmd => cmd.trigger === command)) {
-            const action = voiceCommands.find(cmd => cmd.trigger === command).action;
-            // Execute action based on command
-            switch (action) {
-                case 'navigate':
-                    // Trigger navigation
-                    window.location.href = '/navigation';
-                    break;
-                case 'search':
-                    // Trigger search
-                    window.location.href = '/search';
-                    break;
-                case 'share':
-                    // Trigger location sharing
-                    navigator.share({
-                        title: '我的位置',
-                        text: '这是我的位置',
-                        url: window.location.href
-                    });
-                    break;
-                default:
-                    console.log('Unknown command action:', action);
+    useEffect(() => {
+        if (transcript) {
+            const timestamp = new Date().toLocaleTimeString();
+            setCommandHistory(prev => [
+                ...prev,
+                { command: transcript, timestamp }
+            ]);
+            
+            // Process voice command
+            if (voiceCommands.some(cmd => cmd.trigger === transcript)) {
+                const action = voiceCommands.find(cmd => cmd.trigger === transcript).action;
+                // Execute action based on command
+                switch (action) {
+                    case 'navigate':
+                        // Trigger navigation
+                        window.location.href = '/navigation';
+                        break;
+                    case 'search':
+                        // Trigger search
+                        window.location.href = '/search';
+                        break;
+                    case 'share':
+                        // Trigger location sharing
+                        navigator.share({
+                            title: '我的位置',
+                            text: '这是我的位置',
+                            url: window.location.href
+                        });
+                        break;
+                    default:
+                        console.log('Unknown command action:', action);
+                }
             }
+            resetTranscript();
         }
-    };
+    }, [transcript, voiceCommands, resetTranscript]);
 
     const handleToggleListening = () => {
-        setIsListening(!isListening);
+        if (!isListening) {
+            // Start listening
+            setIsListening(true);
+        } else {
+            // Stop listening
+            setIsListening(false);
+            resetTranscript();
+        }
     };
 
     const formatTime = (time) => {
