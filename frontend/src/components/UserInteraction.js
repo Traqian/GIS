@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './UserInteraction.css';
-import { ReactVoiceRecognition } from 'react-voice-recognition';
+import { useSpeechRecognition } from 'react-speech-recognition';
 
 const UserInteraction = () => {
     const [feedback, setFeedback] = useState('');
     const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
     const [voiceCommands, setVoiceCommands] = useState([]);
-    const [isListening, setIsListening] = useState(false);
-    const [lastCommand, setLastCommand] = useState('');
     const [commandHistory, setCommandHistory] = useState([]);
+    const { transcript, listening, resetTranscript } = useSpeechRecognition();
+    const [isListening, setIsListening] = useState(false);
 
     useEffect(() => {
         // Load predefined voice commands
@@ -42,7 +42,6 @@ const UserInteraction = () => {
     };
 
     const handleVoiceCommand = (command) => {
-        setLastCommand(command);
         const timestamp = new Date().toLocaleTimeString();
         setCommandHistory(prev => [
             ...prev,
