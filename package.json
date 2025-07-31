@@ -1,0 +1,12 @@
+{
+  "name": "campus-gis",
+  "version": "1.0.0",
+  "description": "校园地理信息系统",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "deploy": "gh-pages -d frontend/build"
+  },
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  }
+}
